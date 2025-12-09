@@ -15,11 +15,11 @@ end compteur_8b;
 architecture Behavioral of compteur_8b is
     signal s_Dout : std_logic_vector (7 downto 0);
 begin
-    clock : process(CK) is
+    clock : process(CK,RST) is
     begin
-        if (CK'event and CK='1') then
-            if RST='0' then                     s_Dout <= (others => '0');
-            elsif LOAD='1' then                 s_Dout <= Din;
+		if RST='0' then                     	s_Dout <= (others => '0');
+        elsif (CK'event and CK='1') then
+        	if LOAD='1' then                 	s_Dout <= Din;
             elsif (SENS='1' and EN='0') then    s_Dout <= std_logic_vector(unsigned(s_Dout)+1);
             elsif (SENS='0' and EN='0') then    s_Dout <= std_logic_vector(unsigned(s_Dout)-1);
             end if;

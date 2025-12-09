@@ -12,10 +12,12 @@ entity manomano is
 end manomano;
 
 architecture compotement of manomano is
-	attribute DONT_TOUCH : string;
-	
------------------------------ Declaration composants ----------------------------------------------
-  
+
+--══════════════════════════════════════════════════════════════════════════════════════════════════════
+--════════════════════════════════════ Component declaration ══════════════════════════════════════
+--══════════════════════════════════════════════════════════════════════════════════════════════════════
+
+--───────────────────────────────────────────────────────────────────────────────────────────── UAL
     component ALU is
     port(
         A, B 		    : in 	std_logic_vector(7 downto 0);
@@ -27,7 +29,8 @@ architecture compotement of manomano is
     signal alu_A, alu_B    : 	std_logic_vector(7 downto 0);
 	signal alu_control     :  	std_logic_vector(2 downto 0);
 	signal alu_S 		   :  	std_logic_vector(7 downto 0);
-		
+	
+--─────────────────────────────────────────────────────────────────────────────────── Register file
     component banc_registre is
     Port (
         ad_A : in  std_logic_vector(3 downto 0);
@@ -49,7 +52,7 @@ architecture compotement of manomano is
     signal banc_W    : std_logic;
     signal banc_Data, banc_QA, banc_QB, banc_S0, banc_S1: std_logic_vector(7 downto 0);
 
-    
+--─────────────────────────────────────────────────────────────────────────────────── 8 bit counter
     component compteur_8b is
         Port ( CK   : in    STD_LOGIC;
                RST  : in    STD_LOGIC;
@@ -61,6 +64,7 @@ architecture compotement of manomano is
     end component;
     signal cpt_en : std_logic;
 
+--─────────────────────────────────────────────────────────────────────────────────────── Data file
     component mem_donnee is
         Port ( ad    : in STD_LOGIC_VECTOR (7 downto 0);
                d_in  : in STD_LOGIC_VECTOR (7 downto 0);
@@ -74,6 +78,7 @@ architecture compotement of manomano is
     signal memd_rw   : std_logic;
     signal memd_dout : std_logic_vector(7 downto 0);
     
+--──────────────────────────────────────────────────────────────────────────────── Instruction File
     component mem_instru is
         Port ( ad 	: in 	STD_LOGIC_VECTOR (7 downto 0);
                clk 	: in	STD_LOGIC;
@@ -82,21 +87,18 @@ architecture compotement of manomano is
     end component;
     signal memi_ad 	:  std_logic_vector( 7 downto 0);
     signal memi_dout : std_logic_vector(31 downto 0);
-	
+
+--────────────────────────────────────────────────────────────────────────────── Pipeline registers
 	signal lidi_op, lidi_a, lidi_b, lidi_c     : std_logic_vector(7 downto 0);
 	signal diex_op, diex_a, diex_b, diex_c     : std_logic_vector(7 downto 0);
 	signal exmem_op, exmem_a, exmem_b          : std_logic_vector(7 downto 0);
 	signal memre_op, memre_a, memre_b          : std_logic_vector(7 downto 0);
 	
-	attribute DONT_TOUCH of ALU : component is "TRUE";
-	attribute DONT_TOUCH of banc_registre : component is "TRUE";
-	attribute DONT_TOUCH of mem_donnee : component is "TRUE";
-	attribute DONT_TOUCH of mem_instru : component is "TRUE";
-	attribute DONT_TOUCH of compteur_8b : component is "TRUE";
-	
 begin
 
------------------------------ Port maps -----------------------------------------------------------
+--══════════════════════════════════════════════════════════════════════════════════════════════════════
+--════════════════════════════════════ Port mapping ═════════════════════════════════════════════════
+--══════════════════════════════════════════════════════════════════════════════════════════════════════
 
     compo_alu : ALU port map(A => alu_A, 
                             B => alu_B, 
@@ -130,6 +132,7 @@ begin
                             clk => CLK,
                             en  => cpt_en,
                             d_out => memi_dout);
+    -- To make the hazard management easier we push the output into our first pipeline register
     lidi_op <= memi_dout(31 downto 24);
     lidi_a  <= memi_dout(23 downto 16);
     lidi_b  <= memi_dout(15 downto 8 );
@@ -142,98 +145,112 @@ begin
                             clk => CLK,
                             d_out => memd_dout);
 
------------------------------ Code microncontroleur -----------------------------------------------
 
-    deplace_pipeline : process(CLK) is
+--══════════════════════════════════════════════════════════════════════════════════════════════════════
+--════════════════════════════════════ Microcontroler code ════════════════════════════════════════
+--══════════════════════════════════════════════════════════════════════════════════════════════════════
+
+    deplace_pipeline : process(CLK, RST) is
     begin
-        if (CLK'event and CLK='1') then
+    	if RST='0' then
+    	
+    		diex_op <= (others => '0');
+    		diex_a <= (others => '0');
+    		diex_b <= (others => '0');
+    		diex_c <= (others => '0');
+    		
+    		exmem_op <= (others => '0');
+    		exmem_a <= (others => '0');
+    		exmem_b <= (others => '0');
+    		
+    		memre_op <= (others => '0');
+    		memre_a <= (others => '0');
+    		memre_b <= (others => '0');
+    		
+        elsif (CLK'event and CLK='1') then
         
-            ------                                             --
-            ----Affectation de Exmem apres la mem donnees    ----
-            --                                             ------
-            memre_op  <= exmem_op;          -- Op n'est jamais modifie
-            memre_a   <= exmem_a;           -- A n'est pas modifie
-            if (exmem_op = X"07") then       -- Si lecture, on recup la valeur
-                memre_b <= memd_dout;
-            else                            -- Sinon on passe B
-                memre_b <= exmem_b;
-            end if;
+--──────────────────────────────────────────────────────────────────────────────────────────── Lidi
+			-- No need to manage Lidi, component mem_instru manages it, and on rising clock
+			
+--──────────────────────────────────────────────────────────────────────────────────────────── Diex
+			diex_op   <= lidi_op;           -- Op never modified
+			diex_a    <= lidi_a;            -- A never seen as value
+			-- For all but AFC and LOAD, B is a numerical value, so put QA instead of lidi_b
+			if (lidi_op = X"06" or lidi_op = X"07") then
+				diex_b <= lidi_b;
+			else
+				diex_b <= banc_qa;
+			end if;
+			-- For all opcodes, we either want the value or don't care about this register
+			diex_c <= banc_qb;
             
-            
-            ------                                             --
-            ----Affectation de Exmem apres l'ALU             ----
-            --                                             ------
-            exmem_op  <= diex_op;           -- Op n'est jamais modifie
-            exmem_a   <= diex_a;            -- A  n'est jamais utilise dans calcul
-            if (diex_op(2) = diex_op(4)) then   -- L'op necessite l'alu
-                exmem_b <= alu_s;            -- B  est le resultat de l'op
-            else                                -- L'ALU n'est pas utilisee, on passe B
-                exmem_b <= diex_b;
-            end if;
-            
-            
-            ------                                             --
-            ----Affectation de DIEX apres le banc de registre----
-            --                                             ------
-            
-            diex_op   <= lidi_op;           -- Op n'est pas modifie
-                diex_a    <= lidi_a;            -- A n'est jamais lu comme valeur
-                -- Pour tout sauf AFC et LOAD, B est une valeur numérique, donc QA
-                if (lidi_op = X"06" or lidi_op = X"07") then
-                    diex_b <= lidi_b;           -- Seules condi pour ne pas prendre la valeur
-                else
-                    diex_b <= banc_qa;
-                end if;
-                diex_c <= banc_qb;              -- Tout le temps considere comme valeur
-            
-            if (cpt_en='1') then -- Blocage
+            -- Hazard detections overwrite
+            if (cpt_en='1') then 	-- Cpt_en is negative logic
             	diex_op <= X"00";
 				diex_a  <= X"00";
 				diex_b  <= X"00";
 				diex_c  <= X"00";
             end if;
-
+			
+			
+--──────────────────────────────────────────────────────────────────────────────────────────── Exmem
+			exmem_op  <= diex_op;           	-- Op n'est jamais modifie
+            exmem_a   <= diex_a;            	-- A  n'est jamais utilise dans calcul
+            if (diex_op(2) = diex_op(4)) then   -- L'op necessite l'alu
+                exmem_b <= alu_s;            	-- B  est le resultat de l'op
+            else                                -- L'ALU n'est pas utilisee, on passe B
+                exmem_b <= diex_b;
+            end if;
             
-            -- lidi s'actualise a la fin du clock tout seul, on l'arrete si bulle
+--──────────────────────────────────────────────────────────────────────────────────────────── Memre
+			memre_op  <= exmem_op;          	-- Op n'est jamais modifie
+            memre_a   <= exmem_a;           	-- A n'est pas modifie
+            if (exmem_op = X"07") then       	-- Si lecture, on recup la valeur
+                memre_b <= memd_dout;
+            else                            	-- Sinon on passe B
+                memre_b <= exmem_b;
+            end if;
         end if;
     end process ;
     
-    -- Affectations des entrees de l'ALU
-    alu_a       <= diex_b;                  -- A toujours en case B
-    alu_b       <= diex_c;                  -- B toujours en case C
-    alu_control <= diex_op(2 downto 0);     -- On fait toujours le calcul, on le prend si on veut
+    -- UAL input assignment
+    alu_a       <= diex_b;                  -- inputA always tied to subregister B
+    alu_b       <= diex_c;                  -- inputB always tied to subregister  C
+    alu_control <= diex_op(2 downto 0);     -- Always does the computations, uses the result if needed
     
-    -- Affectations des entrees du Banc de Registres
-    banc_ad_a   <= lidi_b(3 downto 0);      -- Lecture A toujours a partir de B
-    banc_ad_b   <= lidi_c(3 downto 0);      -- Lecture B toujours a partir de C
-    banc_W      <= '1' when (memre_op /= "00001000" and memre_op /= "UUUUUUUU" and memre_op /= "00000000") else '0'; -- Tout sauf STORE font retour ecriture
+    -- Register file input assignment
+    banc_ad_a   <= lidi_b(3 downto 0);      -- input A always tied to subregister B
+    banc_ad_b   <= lidi_c(3 downto 0);      -- input B always tied to subregister C
+    banc_W      <= '1' when (memre_op /= "00001000" and memre_op /= "00000000") else '0'; -- All but store and nop write in register file
     banc_ad_W   <= memre_a(3 downto 0);
     banc_data   <= memre_b;
     
-    -- Affectations des entrees du compteur
-    -- Cpt_en vaut 1 quand bulle necessaire
+    -- Counter input assignment
+    -- Cpt_en is negative logic, so '1' locks the counter and intruction file.
     cpt_en <= '1' when 	(	(lidi_op=X"17" or lidi_op=X"05" or lidi_op=X"08") and 
 							(	(diex_op/=X"08" and diex_op/=X"00" and lidi_b=diex_a)  or
 								(exmem_op/=X"08" and diex_op/=X"00" and lidi_b=exmem_a) or
 								(memre_op/=X"08" and diex_op/=X"00" and lidi_b=memre_a)
-							) -- Ces instru lisent (B) comme une adresse, on check les etapes du pipeline qui ecrivent a la meme adresse (A)
+							)
+							-- These instructions use B as an adress, so we check the next pipelines step that write to same adress
                 		)or(
                 			(lidi_op=X"01" or lidi_op=X"02" or lidi_op=X"03" or lidi_op=X"14" or lidi_op=X"15" or lidi_op=X"16") and
 							(	(diex_op/=X"08" and diex_op/=X"00" and (lidi_b=diex_a or lidi_c=diex_a)) or
 								(exmem_op/=X"08" and diex_op/=X"00" and (lidi_b=exmem_a or lidi_c=exmem_a)) or
 								(memre_op/=X"08" and diex_op/=X"00" and (lidi_b=memre_a or lidi_c=memre_a))
 							)
+							-- These instructions use both A and B as an adress, so we check the next pipelines step that write to same adress
 						)
                else '0';
         
-    -- Affectation des entrées Memoire Donnees
-    memd_ad     <= exmem_a when (exmem_op = X"08") else exmem_b; -- A quand on STORE, B sinon
-    memd_din    <= exmem_b;                 -- Toujours B pour la data a ecrire
-    memd_rw     <= '0' when (exmem_op = X"08") else '1';             -- 0 si ecriture vers memoire, 1 si lecture de memoire
+    -- Data file input assignment
+    memd_ad     <= exmem_a when (exmem_op = X"08") else exmem_b; 	-- A when we STORE, B for everyone else
+    memd_din    <= exmem_b;                 						-- Always use B for data writing
+    memd_rw     <= '0' when (exmem_op = X"08") else '1';             -- 0 if writing TO memory, 1 if reading FROM memory
     
-    -- Affectations sorties
-    sortieA <= banc_S0;
+    -- Output pins assignment
+    sortieA <= banc_S0; 		-- Fetches lines 1 and 2 of register file
     sortieB <= banc_S1;
-    pc_out <= memi_ad;
+    pc_out <= memi_ad;			-- Used to debug in simulation.
 	
 end compotement;

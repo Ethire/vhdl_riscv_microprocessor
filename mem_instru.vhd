@@ -13,7 +13,7 @@ end mem_instru;
 architecture compo of mem_instru is
     type t_banc is array (0 to 255) of std_logic_vector(31 downto 0);
     constant memoire : t_banc := (
-    					1 =>  	X"0601F000", -- Afc     R1, 0xF0
+    					1 =>  	X"0601F000", -- Afc    R1, 0xF0
 						2 =>    X"06020F00", -- Afc    R2, 0x0F
 						3 =>    X"06030700", -- Afc    R3, 0X07
 						4 =>    X"06040A00", -- Afc    R4, 0X0A
