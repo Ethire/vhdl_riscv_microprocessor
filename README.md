@@ -2,14 +2,23 @@
 A limited implementation of a riscV processor as a course project.
 
 ## Functionnal overview
-
+This project aims at creating a limited yet functionnal microprocessor using the RISC architecture, using VHDL.
+This processor contains the following components, implemented and tested independently, before being assembled into ``projet_compo``.
+- ALU for arithmetic and bitwise operations
+- Double port register bank for quick data manipulation
+- Data and Instructions memory
+- 8 bit counter that serves as programm counter
+To assemble everything we implemented a 5 stage pipeline, and implemented data hazard prevention using the bubble method.
+This implementation considers every operation and checks the rest of the pipeline before blocking incoming instructions.
 
 ## Description of core components
 
-### 1. UAL
+### 1. ALU
 **Overview**\
-We designed the UAL with its combinational nature in mind : the main part is in a process driven by the following sensitivity list : ``(A, B, control)``, no clock needed.
-Every bitwise operation can be simply implemented as ``out <= A op B``, but the more complex operations such as Multiply and Add requires mure memory. The worst is Multiply, that needs 16 bits at worst to store the result. Thus we extend our inputs and outputs internally by adding leading 0s
+We designed the ALU with its combinational nature in mind : the main part is in a process driven by the following sensitivity list : ``(A, B, control)``, no clock needed.
+Every bitwise operation can be simply implemented as ``out <= A op B``, but the more complex operations such as Multiply and Add require more memory.
+The worst is Multiply, that needs 16 bits at worst to store the result. Thus we extend our inputs and outputs internally by adding leading 0s.
+The mathematical operators are greatly simplified by using the standart IEEE.unsigned library.
 
 The synthesizers report gives us the LUTs and Registers count.
 We can verify that our model is purely combinational : no registers were used
