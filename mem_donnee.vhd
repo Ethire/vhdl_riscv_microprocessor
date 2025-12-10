@@ -25,6 +25,6 @@ begin
                 memoire(to_integer(unsigned(ad))) <= d_in;
         end if;
     end process;
-    -- Parallel output of the memory line to make the data hazard detections easier
+    -- Parallel output of the memory line to make the pipeline easier
     d_out <= memoire(to_integer(unsigned(ad)));
 end compo;

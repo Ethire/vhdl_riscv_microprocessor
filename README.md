@@ -24,28 +24,29 @@ The synthesizers report gives us the LUTs and Registers count.
 We can verify that our model is purely combinational : no registers were used
 ```c
 +-------------------------+------+-------+------------+-----------+-------+
-|        Site Type        | Used | Fixed | Prohibited | Available | Util% |
-+-------------------------+------+-------+------------+-----------+-------+
-| Slice LUTs*             |  107 |     0 |          0 |    303600 |  0.04 |
-|   LUT as Logic          |  107 |     0 |          0 |    303600 |  0.04 |
-|   LUT as Memory         |    0 |     0 |          0 |    130800 |  0.00 |
-| Slice Registers         |    0 |     0 |          0 |    607200 |  0.00 |
-|   Register as Flip Flop |    0 |     0 |          0 |    607200 |  0.00 |
-|   Register as Latch     |    0 |     0 |          0 |    607200 |  0.00 |
-| F7 Muxes                |    0 |     0 |          0 |    151800 |  0.00 |
-| F8 Muxes                |    0 |     0 |          0 |     75900 |  0.00 |
+!!!remplacer le tableau
 +-------------------------+------+-------+------------+-----------+-------+
 ```
+
+Here is the behavioral testbench of the ALU
+!!! ajouter
 
 ### 2. Register file
 
 ### 3. 8 bit counter
+The 8 bit counter was made as a practical exercice for learning how to implement a program on our development board
 
 ### 4. Memories
 According to the desired architecture, we split up the main memory into the instruction and data memory. We decided to create 2 different files not to jam the 2 architectures together.
+Again, the architecture is centered around an array of ``std_logic_vector``.
+The data file is read asynchronously but set synchronously, while the instruction file is read synchronously.
+The data file read needed to be done within the clock tick such that we didn't have to implement a data hazard detection, when we try to read at an adress we just wrote on.
 
 #### 4.1 Data memory
 
+
 #### 4.2 Instruction memory
 
+
 ### 5. Datapath
+
