@@ -22,7 +22,7 @@ The mathematical operators are greatly simplified by using the standart IEEE.uns
 
 The synthesizers report gives us the LUTs and Registers count.
 We can verify that our model is purely combinational : no registers were used
-```c
+```
 +-------------------------+------+-------+------------+-----------+-------+
 !!!remplacer le tableau
 +-------------------------+------+-------+------------+-----------+-------+
@@ -32,7 +32,7 @@ Here is the behavioral testbench of the ALU
 !!! ajouter
 
 ### 2. Register file
-
+We made the Register File based on an array of "std_logic_vector" that makes us 16 registers, we write the data on a register synchronously at the opposite of the reading. According to the wanted architecture, we can read two register throught two outputs.
 ### 3. 8 bit counter
 The 8 bit counter was made as a practical exercice for learning how to implement a program on our development board
 
