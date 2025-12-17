@@ -42,11 +42,6 @@ Again, the architecture is centered around an array of ``std_logic_vector``.
 The data file is read asynchronously but set synchronously, while the instruction file is read synchronously.
 The data file read needed to be done within the clock tick such that we didn't have to implement a data hazard detection, when we try to read at an adress we just wrote on.
 
-#### 4.1 Data memory
-
-
-#### 4.2 Instruction memory
-
 
 ### 5. Datapath
 
