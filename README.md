@@ -24,12 +24,19 @@ The synthesizers report gives us the LUTs and Registers count.
 We can verify that our model is purely combinational : no registers were used
 ```c
 +-------------------------+------+-------+------------+-----------+-------+
-!!!remplacer le tableau
+|        Site Type        | Used | Fixed | Prohibited | Available | Util% |
++-------------------------+------+-------+------------+-----------+-------+
+| Slice LUTs*             |   78 |     0 |          0 |     20800 |  0.38 |
+|   LUT as Logic          |   78 |     0 |          0 |     20800 |  0.38 |
+|   LUT as Memory         |    0 |     0 |          0 |      9600 |  0.00 |
+| Slice Registers         |    0 |     0 |          0 |     41600 |  0.00 |
+|   Register as Flip Flop |    0 |     0 |          0 |     41600 |  0.00 |
+|   Register as Latch     |    0 |     0 |          0 |     41600 |  0.00 |
+| F7 Muxes                |    0 |     0 |          0 |     16300 |  0.00 |
+| F8 Muxes                |    0 |     0 |          0 |      8150 |  0.00 |
 +-------------------------+------+-------+------------+-----------+-------+
 ```
-
-Here is the behavioral testbench of the ALU
-!!! ajouter
+The behavioral testbench of the ALU can 
 
 ### 2. Register file
 
