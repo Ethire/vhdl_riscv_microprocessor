@@ -29,17 +29,18 @@ begin
     B_ex <= X"00"&B ;
     
     with control select
-        Res_temp <= X"00"&(A and B) when "100",
-            X"00"&(A or B)              when "101",
-            X"00"&(A xor B)             when "110",
-            X"00"&(not A)               when "111",
+        Res_temp <= 
+        	X"00"&(A and B) 									when "100",
+            X"00"&(A or B)              						when "101",
+            X"00"&(A xor B)             						when "110",
+            X"00"&(not A)               						when "111",
             std_logic_vector(unsigned(A_ex) + unsigned(B_ex))   when "001",
             std_logic_vector(unsigned(A_ex) - unsigned(B_ex))   when "011",
             std_logic_vector(unsigned(A) * unsigned(B))         when "010",
-            A_ex                        when others;
+            A_ex                        						when others;
             
-	S 	<= Res_temp(7 downto 0);
-	Car 	<= Res_temp(8) when control="100" else '0';
-	Ovf 	<= '1' when (Res_temp(15 downto 0) /= X"0000" and control="110") else '0';
-	Neg 	<= '1' when (B>A and control="101") else '0';
+	S 		<= Res_temp(7 downto 0);
+	Car 	<= Res_temp(8) when control="001" else '0';
+	Ovf 	<= '1' when (Res_temp(15 downto 8) /= X"0000" and control="010") else '0';
+	Neg 	<= '1' when (B>A and control="011") else '0';
 end behav;
