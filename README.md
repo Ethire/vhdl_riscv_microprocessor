@@ -22,7 +22,7 @@ The mathematical operators are greatly simplified by using the standart IEEE.uns
 
 The synthesizers report gives us the LUTs and Registers count.
 We can verify that our model is purely combinational : no registers were used
-```c
+```
 +-------------------------+------+-------+------------+-----------+-------+
 |        Site Type        | Used | Fixed | Prohibited | Available | Util% |
 +-------------------------+------+-------+------------+-----------+-------+
@@ -39,7 +39,7 @@ We can verify that our model is purely combinational : no registers were used
 The behavioral testbench of the ALU can 
 
 ### 2. Register file
-
+We made the Register File based on an array of "std_logic_vector" that makes us 16 registers, we write the data on a register synchronously at the opposite of the reading. According to the wanted architecture, we can read two register throught two outputs.
 ### 3. 8 bit counter
 The 8 bit counter was made as a practical exercice for learning how to implement a program on our development board
 
@@ -48,11 +48,6 @@ According to the desired architecture, we split up the main memory into the inst
 Again, the architecture is centered around an array of ``std_logic_vector``.
 The data file is read asynchronously but set synchronously, while the instruction file is read synchronously.
 The data file read needed to be done within the clock tick such that we didn't have to implement a data hazard detection, when we try to read at an adress we just wrote on.
-
-#### 4.1 Data memory
-
-
-#### 4.2 Instruction memory
 
 
 ### 5. Datapath
