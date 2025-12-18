@@ -42,6 +42,22 @@ This is the behavioral testbench of the ALU:
 ### 2. Register file
 We made the Register File based on an array of "std_logic_vector" that makes us 16 registers, we write the data on a register synchronously at the opposite of the reading. According to the wanted architecture, we can read two register throught two outputs.
 
+The synthesizers report gives us the LUTs and Registers count.
+```
++-------------------------+------+-------+------------+-----------+-------+
+|        Site Type        | Used | Fixed | Prohibited | Available | Util% |
++-------------------------+------+-------+------------+-----------+-------+
+| Slice LUTs*             |   99 |     0 |          0 |     20800 |  0.48 |
+|   LUT as Logic          |   99 |     0 |          0 |     20800 |  0.48 |
+|   LUT as Memory         |    0 |     0 |          0 |      9600 |  0.00 |
+| Slice Registers         |  128 |     0 |          0 |     41600 |  0.31 |
+|   Register as Flip Flop |  128 |     0 |          0 |     41600 |  0.31 |
+|   Register as Latch     |    0 |     0 |          0 |     41600 |  0.00 |
+| F7 Muxes                |   32 |     0 |          0 |     16300 |  0.20 |
+| F8 Muxes                |   16 |     0 |          0 |      8150 |  0.20 |
++-------------------------+------+-------+------------+-----------+-------+
+```
+
 Here is the behavioral testbench of the register file:
 ![alt text][rgf_tb]
 
@@ -49,6 +65,21 @@ Here is the behavioral testbench of the register file:
 The 8 bit counter was made as a practical exercice for learning how to implement a program on our development board
 It lies on a clock, negative logic reset, negative logic enable, up/down, load, d_in and d_out ports.
 
+
+```
++-------------------------+------+-------+------------+-----------+-------+
+|        Site Type        | Used | Fixed | Prohibited | Available | Util% |
++-------------------------+------+-------+------------+-----------+-------+
+| Slice LUTs*             |   13 |     0 |          0 |     20800 |  0.06 |
+|   LUT as Logic          |   13 |     0 |          0 |     20800 |  0.06 |
+|   LUT as Memory         |    0 |     0 |          0 |      9600 |  0.00 |
+| Slice Registers         |    8 |     0 |          0 |     41600 |  0.02 |
+|   Register as Flip Flop |    8 |     0 |          0 |     41600 |  0.02 |
+|   Register as Latch     |    0 |     0 |          0 |     41600 |  0.00 |
+| F7 Muxes                |    0 |     0 |          0 |     16300 |  0.00 |
+| F8 Muxes                |    0 |     0 |          0 |      8150 |  0.00 |
++-------------------------+------+-------+------------+-----------+-------+
+```
 Here is the behavioral testbench of the register file:
 ![alt text][8bc_tb]
 
@@ -58,12 +89,69 @@ Again, the architecture is centered around an array of ``std_logic_vector``.
 The data file is read asynchronously but set synchronously, while the instruction file is read synchronously.
 The data file read needed to be done within the clock tick such that we didn't have to implement a data hazard detection, when we try to read at an adress we just wrote on.
 
+The synthesizers reports gives us the LUTs and Registers count.
+a warning is displayed : LUT and register counts can differ from implementation. In our case, the count doesn't change.
+Data Memory :
+```
++-------------------------+------+-------+------------+-----------+-------+
+|        Site Type        | Used | Fixed | Prohibited | Available | Util% |
++-------------------------+------+-------+------------+-----------+-------+
+| Slice LUTs*             |  842 |     0 |          0 |    303600 |  0.28 |
+|   LUT as Logic          |  842 |     0 |          0 |    303600 |  0.28 |
+|   LUT as Memory         |    0 |     0 |          0 |    130800 |  0.00 |
+| Slice Registers         | 2048 |     0 |          0 |    607200 |  0.34 |
+|   Register as Flip Flop | 2048 |     0 |          0 |    607200 |  0.34 |
+|   Register as Latch     |    0 |     0 |          0 |    607200 |  0.00 |
+| F7 Muxes                |  272 |     0 |          0 |    151800 |  0.18 |
+| F8 Muxes                |  136 |     0 |          0 |     75900 |  0.18 |
++-------------------------+------+-------+------------+-----------+-------+
+```
+
+Instruction Memory : the synthesiser only uses Flip/Flops for non-noop instruction
+```
++-------------------------+------+-------+------------+-----------+-------+
+|        Site Type        | Used | Fixed | Prohibited | Available | Util% |
++-------------------------+------+-------+------------+-----------+-------+
+| Slice LUTs*             |   14 |     0 |          0 |    303600 | <0.01 |
+|   LUT as Logic          |   14 |     0 |          0 |    303600 | <0.01 |
+|   LUT as Memory         |    0 |     0 |          0 |    130800 |  0.00 |
+| Slice Registers         |   16 |     0 |          0 |    607200 | <0.01 |
+|   Register as Flip Flop |   16 |     0 |          0 |    607200 | <0.01 |
+|   Register as Latch     |    0 |     0 |          0 |    607200 |  0.00 |
+| F7 Muxes                |    0 |     0 |          0 |    151800 |  0.00 |
+| F8 Muxes                |    0 |     0 |          0 |     75900 |  0.00 |
++-------------------------+------+-------+------------+-----------+-------+
+```
+
+Here is the behavioral testbench for both memories:
+![alt text][mem_tb]
+
+
 ### 5. Datapath
 All of the components were merged into projet_compo, the main project.
 We created a 5 stage pipeline with data hazard protection. The protection uses a bubble algorithm to stall instructions that are going to read a register that is going to be modified later in the pipeline, covering every instructions and every case for this hasard.
 Everything implemented works in behavioral simulation, synthesise and still remains functionning.
 
+Last one : here is the whole projects summary of LUT and Registers used :
+```
++-------------------------+------+-------+------------+-----------+-------+
+|        Site Type        | Used | Fixed | Prohibited | Available | Util% |
++-------------------------+------+-------+------------+-----------+-------+
+| Slice LUTs*             | 1054 |     0 |          0 |     20800 |  5.07 |
+|   LUT as Logic          | 1054 |     0 |          0 |     20800 |  5.07 |
+|   LUT as Memory         |    0 |     0 |          0 |      9600 |  0.00 |
+| Slice Registers         | 2192 |     0 |          0 |     41600 |  5.27 |
+|   Register as Flip Flop | 2192 |     0 |          0 |     41600 |  5.27 |
+|   Register as Latch     |    0 |     0 |          0 |     41600 |  0.00 |
+| F7 Muxes                |  280 |     0 |          0 |     16300 |  1.72 |
+| F8 Muxes                |  136 |     0 |          0 |      8150 |  1.67 |
++-------------------------+------+-------+------------+-----------+-------+
+```
+
+Here is the final testbench, using all components, using post_synthesis
 
 [8bc_tb]: https://github.com/Ethire/vhdl_riscv_microprocessor/blob/main/testbench_graphs/8_bit_counter_tb.PNG "Behavioral simulation of 8bit counter"
 [alu_tb]: https://github.com/Ethire/vhdl_riscv_microprocessor/blob/main/testbench_graphs/alu_tb.PNG "Alu testbench"
 [rgf_tb]: https://github.com/Ethire/vhdl_riscv_microprocessor/blob/main/testbench_graphs/register_file_tb.PNG "Register file testbench"
+[mem_tb]: https://github.com/Ethire/vhdl_riscv_microprocessor/blob/main/testbench_graphs/memory_tb.PNG "Memories testbench"
+[all_tb]: 
