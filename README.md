@@ -150,8 +150,23 @@ Last one : here is the whole projects summary of LUT and Registers used :
 
 Here is the final testbench, using all components, using post_synthesis
 
+<!-- every component testbench -->
 [8bc_tb]: https://github.com/Ethire/vhdl_riscv_microprocessor/blob/main/testbench_graphs/8_bit_counter_tb.PNG "Behavioral simulation of 8bit counter"
 [alu_tb]: https://github.com/Ethire/vhdl_riscv_microprocessor/blob/main/testbench_graphs/alu_tb.PNG "Alu testbench"
 [rgf_tb]: https://github.com/Ethire/vhdl_riscv_microprocessor/blob/main/testbench_graphs/register_file_tb.PNG "Register file testbench"
 [mem_tb]: https://github.com/Ethire/vhdl_riscv_microprocessor/blob/main/testbench_graphs/memory_tb.PNG "Memories testbench"
-[all_tb]: 
+[all_tb]: https://github.com/Ethire/vhdl_riscv_microprocessor/blob/main/project_visuals/total_tb.PNG "Project testbench, main signals"
+
+<!-- project schematic -->
+[all_sch]: https://github.com/Ethire/vhdl_riscv_microprocessor/blob/main/project_visuals/schema_tout.PNG "project schematic"
+
+
+<!-- project simulation stages -->
+[all_beh]: https://github.com/Ethire/vhdl_riscv_microprocessor/blob/main/project_visuals/totbe_tb.PNG "Behavioral port simulation"
+[all_syn]: https://github.com/Ethire/vhdl_riscv_microprocessor/blob/main/project_visuals/totsy_tb.PNG "Post synthesis functional port simulation"
+[all_imp]: https://github.com/Ethire/vhdl_riscv_microprocessor/blob/main/project_visuals/totim_tb.PNG "Post implementation functional port simulation"
+[all_imp_tim]: https://github.com/Ethire/vhdl_riscv_microprocessor/blob/main/project_visuals/totim_tb_timing.PNG "Post implementation timing port simulation"
+
+<!-- project implementation stats-->
+[imp_use]: https://github.com/Ethire/vhdl_riscv_microprocessor/blob/main/project_visuals/imple_use.PNG "Implemented project : LUT and Register use"
+[imp_crit]: https://github.com/Ethire/vhdl_riscv_microprocessor/blob/main/project_visuals/imple_timing_report.PNG "Implemented project : Critical path"
