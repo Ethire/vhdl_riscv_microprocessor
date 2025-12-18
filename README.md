@@ -1,5 +1,6 @@
 # vhdl_riscv_microprocessor
 A limited implementation of a riscV processor as a course project.
+Made by Etienne Gadefait and Ulrich Melade
 
 ## Functionnal overview
 This project aims at creating a limited yet functionnal microprocessor using the RISC architecture, using VHDL.
